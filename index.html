@@ -627,4 +627,20 @@
     if(P[el.id])obs.observe(el);
   });
 })();
+</script><script>
+(function(){
+  if(!('IntersectionObserver' in window))return;
+  var io=new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(!e.isIntersecting)return;
+      e.target.querySelectorAll('img[loading="lazy"]').forEach(function(img){
+        img.removeAttribute('loading');
+      });
+      io.unobserve(e.target);
+    });
+  },{rootMargin:'500px 0px'});
+  document.querySelectorAll('[class*="Project-module---wrap"]').forEach(function(s){
+    io.observe(s);
+  });
+})();
 </script></body></html>
