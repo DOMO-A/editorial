@@ -629,6 +629,12 @@
 })();
 </script><script>
 (function(){
+  var projectIds = [].slice.call(document.querySelectorAll('.src-components-Project----Project-module---wrap---h6rD-')).map(function(p){return p.id;});
+  var navLinks = document.querySelectorAll('.src-components-Nav----Nav-module---list---1eRGw a');
+  navLinks.forEach(function(a, i){
+    if(projectIds[i]) a.setAttribute('href', '#' + projectIds[i]);
+  });
+
   document.querySelectorAll('.src-components-Nav----Nav-module---button---2JxVM').forEach(function(btn){
     btn.addEventListener('click', function(){
       var dropdown = btn.nextElementSibling;
