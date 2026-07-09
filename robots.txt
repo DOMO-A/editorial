@@ -1,4 +1,16 @@
 User-agent: *
 Allow: /
 
+User-agent: GPTBot
+Disallow: /static/
+
+User-agent: ClaudeBot
+Disallow: /static/
+
+User-agent: PerplexityBot
+Disallow: /static/
+
+User-agent: Google-Extended
+Disallow: /static/
+
 Sitemap: https://editorial.domo-a.com/sitemap.xml
