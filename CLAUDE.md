@@ -4,10 +4,14 @@
 
 Build compilat de Gatsby (no el codi font) desplegat a `editorial.domo-a.com`.
 **No hi ha `src/`** — els canvis es fan directament sobre els fitxers compilats:
-- `index.html` — HTML estàtic (SSR)
-- `path---index-ad73836a3e08efd572fa.js` — dades dels projectes (GraphQL result)
-- `component---src-pages-index-js-1678f5de000ff9cfcca4.js` — component React principal
+- `index.html` — HTML estàtic (SSR) + tota la interactivitat en vanilla JS inline
 - `static/` — imatges (jpg + webp)
+
+**08-07-2026 (commit `214cc84`): runtime React/Gatsby eliminat.** La hidratació React reconstruïa l'arbre d'imatges al muntar i trencava `loading="lazy"` natiu (les ~140 imatges es carregaven totes de cop). S'han tret els 5 `<script src>` de bundles + webpack manifest + neteja de Service Worker. L'HTML SSR ja era correcte i ara es queda intacte.
+
+Tota la interacció (dropdown de nav, panell "About", slider, títol/descripció dinàmics) és **vanilla JS inline dins `index.html`** — no hi ha component React actiu.
+
+**Fitxers `.js` orfes al root** (`app-*.js`, `commons-*.js`, `component---*.js`, `path---*.js`, inclòs `path---index-ad73836a3e08efd572fa.js`) — **ja no es carreguen enlloc**. Continuen físicament al repo però no els edita ningú: qualsevol canvi allà no té efecte al lloc en producció.
 
 ## Arquitectura d'imatges
 
@@ -20,7 +24,7 @@ Dos tipus de fitxers al `static/`:
 
 ## Canvis implementats
 
-- `index.html` + component React: imatges servides via `<picture>` + WebP (140 imatges)
+- `index.html`: imatges servides via `<picture>` + WebP (140 imatges)
 - 85 WebP de projectes nombrats recomprimits: q82 → q75 (~27% menys), borisryzhy a q65
 - `<title>` i `<meta description>` dinàmics per projecte via IntersectionObserver (script inline al final de `index.html`)
 - Cada secció de projecte té `id` = slug → `/#vida` funciona
@@ -42,20 +46,14 @@ Per actualitzar dades de l'organització (adreça, telèfon, etc.) editar direct
 
 ## Com actualitzar metadescripcions
 
-Les descripcions viuen a **dos llocs** que cal sincronitzar:
+Les descripcions viuen a **dos llocs dins `index.html`** que cal sincronitzar (des del 08-07-2026 ja NO cal tocar `path---index-ad73836a3e08efd572fa.js` — orfe, sense efecte):
 
-1. **`path---index-ad73836a3e08efd572fa.js`** — dades React:
-   ```
-   description:[{type:"paragraph",text:"TEXT AQUÍ"}]
-   ```
-   ⚠️ Compte amb cometes escapades dins el text JSON (`\"`)
-
-2. **Script inline a `index.html`** — objecte `P` al final del `<body>`:
+1. **Script inline a `index.html`** — objecte `P` al final del `<body>`:
    ```js
    "slug":{t:"Títol",d:"Descripció aquí"}
    ```
 
-3. **JSON-LD al `<head>` de `index.html`** — camp `"description"` de cada `VisualArtwork`
+2. **JSON-LD al `<head>` de `index.html`** — camp `"description"` de cada `VisualArtwork`
 
 ## Projectes — títols i metadescripcions
 
@@ -93,12 +91,11 @@ Les descripcions viuen a **dos llocs** que cal sincronitzar:
 
 1. Afegir imatges jpg+webp a `static/` (5 mides: 275, 550, 1100, 1650, 2200px), comprimir webp a q75
 2. Editar `index.html`: afegir el bloc HTML del projecte i l'ítem de nav (copiar patró existent, renumerar)
-3. Editar `path---index-ad73836a3e08efd572fa.js`: afegir node a `allPrismicDocument.edges` i a `allImageSharp.edges`
-4. Editar l'script `P` al final del `<body>` de `index.html`: afegir `"slug":{t:"Títol",d:"Desc"}`
-5. Editar el JSON-LD al `<head>`: afegir entrada `VisualArtwork` a `hasPart`
+3. Editar l'script `P` al final del `<body>` de `index.html`: afegir `"slug":{t:"Títol",d:"Desc"}`
+4. Editar el JSON-LD al `<head>`: afegir entrada `VisualArtwork` a `hasPart`
 
 ## Advertències
 
-- **Mai usar `sed` per substituir text amb caràcters especials** (×, –, é, etc.) al path JS — trenca la sintaxi JSON. Usar Python amb `str.replace()` i `json.dumps(..., ensure_ascii=False)`.
+- **Mai usar `sed` per substituir text amb caràcters especials** (×, –, é, etc.) dins l'objecte `P` o el JSON-LD a `index.html` — trenca la sintaxi JSON/JS. Usar Python amb `str.replace()` i `json.dumps(..., ensure_ascii=False)`.
 - **Mai usar regex amb `re.subn(repl_string)` quan el text de reemplaçament conté `\u`** — Python ho interpreta com escape. Usar lambda: `re.subn(pattern, lambda m: nou_text, s)`.
-- El path JS és un fitxer JavaScript minificat d'una sola línia. Qualsevol error de sintaxi trenca el slider i el sticky nav.
+- Slider i sticky nav ara són vanilla JS inline a `index.html` (no depenen de cap fitxer `.js` extern). Qualsevol error de sintaxi als scripts inline trenca'ls igualment — provar sempre en local abans de desplegar.
