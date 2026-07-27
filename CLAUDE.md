@@ -2,8 +2,9 @@
 
 ## Què és aquest repo
 
-Build compilat de Gatsby (no el codi font) desplegat a `editorial.domo-a.com`.
-**No hi ha `src/`** — els canvis es fan directament sobre els fitxers compilats:
+HTML estàtic pla desplegat a `editorial.domo-a.com`. **Ja NO és Gatsby** — no hi ha cap build ni framework actiu, `main` és directament el codi desplegat.
+Els noms de classe (`src-components-Project----Project-module---wrap---h6rD-`, etc.) són residus de quan es generava amb Gatsby, però no signifiquen que Gatsby corri enlloc.
+**No hi ha `src/`** — els canvis es fan directament sobre aquests fitxers:
 - `index.html` — HTML estàtic (SSR) + tota la interactivitat en vanilla JS inline
 - `static/` — imatges (jpg + webp)
 
@@ -27,6 +28,7 @@ Dos tipus de fitxers al `static/`:
 - `index.html`: imatges servides via `<picture>` + WebP (140 imatges)
 - 85 WebP de projectes nombrats recomprimits: q82 → q75 (~27% menys), borisryzhy a q65
 - `<title>` i `<meta description>` dinàmics per projecte via IntersectionObserver (script inline al final de `index.html`)
+- **27-07-2026:** fix bug on carregar la pàgina mostrava per defecte `#sandragrossfotografia` (títol i hash) sense que l'usuari fes scroll — l'observer disparava a l'estat inicial. Ara es bloqueja amb flag `userScrolled` fins al primer `scroll` real ([index.html:622](index.html)).
 - Cada secció de projecte té `id` = slug → `/#vida` funciona
 - Nav corregida: 27 projectes numerats 01–27 (els 4 nous estaven absents)
 - OG tags i Schema.org JSON-LD afegits al `<head>` de `index.html`

@@ -619,7 +619,10 @@
   }
   var hash=location.hash.slice(1);
   if(hash&&P[hash])upd(hash);
+  var userScrolled=false;
+  window.addEventListener('scroll',function(){userScrolled=true;},{once:true,passive:true});
   var obs=new IntersectionObserver(function(es){
+    if(!userScrolled)return;
     es.forEach(function(e){if(e.isIntersecting)upd(e.target.id);});
   },{rootMargin:'-30% 0px -60% 0px'});
   document.querySelectorAll('[data-reactid]').forEach(function(el){
