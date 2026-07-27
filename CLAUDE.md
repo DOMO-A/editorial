@@ -28,7 +28,10 @@ Dos tipus de fitxers al `static/`:
 - `index.html`: imatges servides via `<picture>` + WebP (140 imatges)
 - 85 WebP de projectes nombrats recomprimits: q82 → q75 (~27% menys), borisryzhy a q65
 - `<title>` i `<meta description>` dinàmics per projecte via IntersectionObserver (script inline al final de `index.html`)
-- **27-07-2026:** fix bug on carregar la pàgina mostrava per defecte `#sandragrossfotografia` (títol i hash) sense que l'usuari fes scroll — l'observer disparava a l'estat inicial. Ara es bloqueja amb flag `userScrolled` fins al primer `scroll` real ([index.html:622](index.html)).
+- **27-07-2026:** sèrie de fixes del bug "es queda enganxat a `#sandragrossfotografia`" (títol i hash), 3 causes independents:
+  1. L'observer disparava a l'estat inicial sense scroll de l'usuari → flag `userScrolled` fins al primer `scroll` real.
+  2. Nav 03/04 (Biblioteca Clandestina / Insane Algorithm) amb el text bescanviat respecte l'ordre real de seccions al DOM → els `href` (assignats per índex) apuntaven creuats.
+  3. El clic al nav feia `upd()` bé, però l'`IntersectionObserver` seguia actiu durant l'scroll animat (`scroll-behavior:smooth`) i el sobreescrivia si de pas travessava la banda d'una altra secció → "nav guard" de 1.2s que bloqueja l'observer durant la transició del clic, cancel·lat a l'instant si l'usuari interromp amb wheel/touch ([index.html:622-650](index.html)).
 - Cada secció de projecte té `id` = slug → `/#vida` funciona
 - Nav corregida: 27 projectes numerats 01–27 (els 4 nous estaven absents)
 - OG tags i Schema.org JSON-LD afegits al `<head>` de `index.html`
